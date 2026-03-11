@@ -2,31 +2,30 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
+use App\Models\Answer;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class SurveyDemoSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $user = \App\Models\User::firstOrCreate(
+        $admin = User::firstOrCreate(
             ['email' => 'admin@starv.ru'],
             [
                 'name' => 'Vadim Starostin',
-                'password' => bcrypt('password123'),
+                'password' => Hash::make('password123'),
             ]
         );
 
-        $survey = $user->surveys()->create([
+        $survey = $admin->surveys()->create([
             'title' => 'Starv Performance Configurator',
             'description' => 'Персонализация вашего BMW M',
             'status' => 'published'
         ]);
 
-        $survey->questions()->create([
+        $q1 = $survey->questions()->create([
             'content' => 'Какая ваша любимая модель BMW?',
             'type' => 'text',
             'order' => 1
@@ -37,7 +36,7 @@ class SurveyDemoSeeder extends Seeder
             'type' => 'radio',
             'order' => 2
         ]);
-        $q2->options()->createMany([
+        $q2_options = $q2->options()->createMany([
             ['option_text' => 'Isle of Man Green'],
             ['option_text' => 'Brooklyn Grey'],
             ['option_text' => 'Frozen Portimao Blue']
@@ -48,10 +47,44 @@ class SurveyDemoSeeder extends Seeder
             'type' => 'checkbox',
             'order' => 3
         ]);
-        $q3->options()->createMany([
+        $q3_options = $q3->options()->createMany([
             ['option_text' => 'Зеркала M-Performance'],
             ['option_text' => 'Задний диффузор'],
             ['option_text' => 'Боковые пороги']
         ]);
+
+        $fakeUsers = [
+            ['name' => 'Antokha', 'email' => 'anton@test.ru'],
+            ['name' => 'Bratva_1', 'email' => 'brat1@test.ru'],
+        ];
+
+        foreach ($fakeUsers as $userData) {
+            $user = User::create([
+                'name' => $userData['name'],
+                'email' => $userData['email'],
+                'password' => Hash::make('password'),
+            ]);
+
+            Answer::create([
+                'user_id' => $user->id,
+                'survey_id' => $survey->id,
+                'question_id' => $q1->id,
+                'text_answer' => 'BMW M4 Competition'
+            ]);
+
+            Answer::create([
+                'user_id' => $user->id,
+                'survey_id' => $survey->id,
+                'question_id' => $q2->id,
+                'option_id' => $q2_options[0]->id 
+            ]);
+
+            Answer::create([
+                'user_id' => $user->id,
+                'survey_id' => $survey->id,
+                'question_id' => $q3->id,
+                'option_id' => $q3_options[0]->id
+            ]);
+        }
     }
 }

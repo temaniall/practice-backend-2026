@@ -39,4 +39,33 @@ class SurveyController extends Controller
 
         return response()->json($survey);
     }
+
+    public function changeStatus(Request $request, $id)
+    {
+        $survey = \App\Models\Survey::findOrFail($id);
+
+        if ($survey->user_id !== auth()->id()) {
+            return response()->json(['message' => 'Вы не можете менять статус чужого опроса'], 403);
+        }
+
+        $validated = $request->validate([
+            'status' => 'required|in:draft,published,closed'
+        ]);
+
+        $survey->update(['status' => $validated['status']]);
+
+        return response()->json([
+            'message' => 'Статус опроса успешно изменен',
+            'survey' => $survey
+        ]);
+    }
+
+    public function showForPassing($id)
+    {
+        $survey = Survey::with('questions.options')
+            ->where('status', 'published')
+            ->findOrFail($id);
+
+        return response()->json($survey);
+    }
 }
