@@ -70,6 +70,7 @@ Table users {
   name varchar
   email varchar
   password varchar
+  role varchar [default: 'user']
   created_at timestamp
 }
 

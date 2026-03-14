@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use App\Models\Answer;
+use App\Models\Survey;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -11,11 +12,12 @@ class SurveyDemoSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin = User::firstOrCreate(
+        $admin = User::updateOrCreate(
             ['email' => 'admin@starv.ru'],
             [
                 'name' => 'Vadim Starostin',
                 'password' => Hash::make('password123'),
+                'role' => 'admin',
             ]
         );
 
@@ -59,11 +61,13 @@ class SurveyDemoSeeder extends Seeder
         ];
 
         foreach ($fakeUsers as $userData) {
-            $user = User::create([
-                'name' => $userData['name'],
-                'email' => $userData['email'],
-                'password' => Hash::make('password'),
-            ]);
+            $user = User::updateOrCreate(
+                ['email' => $userData['email']],
+                [
+                    'name' => $userData['name'],
+                    'password' => Hash::make('password'),
+                ]
+            );
 
             Answer::create([
                 'user_id' => $user->id,
