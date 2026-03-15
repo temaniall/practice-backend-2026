@@ -73,4 +73,50 @@ class AnswerController extends Controller
 
         return response()->json(['message' => 'Ответы успешно сохранены!'], 201);
     }
+
+    public function getStats($id)
+    {
+        $survey = Survey::with(['questions.options', 'questions.answers'])->findOrFail($id);
+
+        $totalParticipants = $survey->answers()->distinct('user_id')->count();
+
+        $statistics = $survey->questions->map(function ($question) use ($totalParticipants) {
+            $data = [
+                'id' => $question->id,
+                'question' => $question->content,
+                'type' => $question->type,
+            ];
+
+            if ($question->type === 'text') {
+                $data['answers'] = $question->answers->pluck('text_answer')->filter()->values();
+            } else {
+                $data['options'] = $question->options->map(function ($option) use ($question) {
+                    $count = $question->answers->where('option_id', $option->id)->count();
+                    $totalQuestionAnswers = $question->answers->count();
+                    
+                    return [
+                        'text' => $option->option_text,
+                        'count' => $count,
+                        'percent' => $totalQuestionAnswers > 0 
+                            ? round(($count / $totalQuestionAnswers) * 100, 2) 
+                            : 0
+                    ];
+                });
+            }
+
+            return $data;
+        });
+
+        return response()->json([
+            'survey_title' => $survey->title,
+            'total_participants' => $totalParticipants,
+            'stats' => $statistics
+        ]);
+    }
+
+    public function export($id)
+    {
+        $survey = Survey::with(['questions.options', 'answers'])->findOrFail($id);
+        return response()->json($survey);
+    }
 }

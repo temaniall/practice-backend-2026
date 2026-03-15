@@ -5,6 +5,7 @@ use App\Http\Controllers\SurveyController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\QuestionOptionController;
+use App\Http\Controllers\AnswerController;
 
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -20,4 +21,6 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/surveys/{id}/take', [App\Http\Controllers\SurveyController::class, 'showForPassing']);
     Route::post('/surveys/{id}/answers', [\App\Http\Controllers\AnswerController::class, 'store']);
     Route::put('/questions/{id}', [QuestionController::class, 'update']);
+    Route::get('/surveys/{id}/stats', [AnswerController::class, 'getStats']);
+    Route::get('/surveys/{id}/export', [AnswerController::class, 'export']);
 });

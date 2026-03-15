@@ -30,11 +30,25 @@ class SurveyController extends Controller
         ], 201);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $user = auth('api')->user();
+        $query = Survey::query();
 
-        return response()->json($user->surveys, 200);
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->has('my')) {
+            $query->where('user_id', auth('api')->id());
+        }
+
+        if ($request->sort === 'popular') {
+            $query->withCount('answers')->orderBy('answers_count', 'desc');
+        } else {
+            $query->latest();
+        }
+
+        return $query->paginate(10);
     }
 
     public function show($id)
