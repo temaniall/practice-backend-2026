@@ -9,6 +9,26 @@ use Illuminate\Http\Request;
 
 class AnswerController extends Controller
 {
+    /**
+     * @OA\Post(
+     * path="/api/surveys/{id}/answers",
+     * summary="Пройти опрос",
+     * tags={"Answers"},
+     * security={{"bearerAuth":{}}},
+     * @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     * @OA\RequestBody(
+     * required=true,
+     * @OA\JsonContent(
+     * @OA\Property(property="answers", type="array", @OA\Items(
+     * @OA\Property(property="question_id", type="integer"),
+     * @OA\Property(property="option_id", type="integer", nullable=true),
+     * @OA\Property(property="text_answer", type="string", nullable=true)
+     * ))
+     * )
+     * ),
+     * @OA\Response(response=201, description="Сохранено")
+     * )
+     */
     public function store(Request $request, $id)
     {
         $survey = Survey::with('questions')->findOrFail($id);
@@ -74,6 +94,15 @@ class AnswerController extends Controller
         return response()->json(['message' => 'Ответы успешно сохранены!'], 201);
     }
 
+    /**
+     * @OA\Get(
+     * path="/api/surveys/{id}/stats",
+     * summary="Статистика опроса (публичная)",
+     * tags={"Answers"},
+     * @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     * @OA\Response(response=200, description="JSON со статистикой")
+     * )
+     */
     public function getStats($id)
     {
         $survey = Survey::with(['questions.options', 'questions.answers'])->findOrFail($id);

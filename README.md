@@ -116,70 +116,67 @@ Table answers {
 
 ![Database Schema](docs/er-diagram.png)
 
-## Инструкция по развертыванию
+## Структура проекта
+* `src/` — исходный код Laravel (Backend).
+* `docker-compose.yml` — конфигурация сервисов Docker.
+* `Dockerfile` — инструкция по сборке PHP 8.4 окружения.
+
+## Быстрый запуск
 
 ### 1. Клонирование репозитория
 Откройте терминал и выполните:
-
+```bash
 git clone [https://github.com/temaniall/practice-backend-2026.git](https://github.com/temaniall/practice-backend-2026.git)
 cd practice-backend-2026
+```
 
-### 2. Подготовка окружения (в папке src)
+### 2. Настройка окружения (.env)
+Необходимо подготовить файл конфигурации внутри папки с кодом:
+```bash
+cp src/.env.example src/.env
+```
 
-Перейдите в директорию с кодом и установите зависимости:
-
-cd src
-composer install
-cp .env.example .env
-php artisan key:generate
-php artisan jwt:secret
-
-### 3. Настройка базы данных
-
-Убедитесь, что ваш локальный MySQL запущен. Отредактируйте файл src/.env, указав параметры подключения:
+Важно: Откройте src/.env и убедитесь, что параметры БД настроены на работу внутри сети Docker (вместо 127.0.0.1 используем db):
 
 DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
+DB_HOST=db
 DB_PORT=3306
-DB_DATABASE=survey
+DB_DATABASE=survey_db
 DB_USERNAME=root
-DB_PASSWORD=ваш_пароль_если_есть
+DB_PASSWORD=root
 
-### 4. Работа с базой данных
+APP_URL=http://localhost:8000
 
-Запуск MySQL
+### 3. Запуск контейнеров
+Запустите сборку и старт сервисов (PHP 8.4, MySQL 8.0, phpMyAdmin):
+```bash
+open -a Docker
+docker-compose up -d --build
+docker-compose up -d
+```
 
-Если сервер не запущен, используйте команду:
+### 4. Настройка приложения внутри контейнера
+Выполните команды для установки зависимостей и генерации ключей безопасности:
+```bash
+docker exec -it survey_app composer install
+docker exec -it survey_app php artisan key:generate
+docker exec -it survey_app php artisan jwt:secret
+```
 
-brew services start mysql
+### 5. Миграции и тестовые данные
+Создайте структуру таблиц и наполните базу тестовыми данными (админ-аккаунт и примеры опросов):
+```bash
+docker exec -it survey_app php artisan migrate:fresh --seed
+```
 
-### 5. Создание и проверка базы
+---
 
-Войдите в консоль MySQL:
+## Доступ к сервисам
 
-mysql -u root -p
+| Сервис      | Адрес                                   | Описание                                          |
+| ----------- | --------------------------------------- | ------------------------------------------------- |
+| Swagger UI  | http://localhost:8000/api/documentation | Документация и тестирование API                   |
+| phpMyAdmin  | http://localhost:8080                   | Визуальное управление БД (Server: db, Pass: root) |
+| API Base URL| http://localhost:8000/api               | Эндпоинт для подключения фронтенда                |
 
-Создайте базу данных (если еще не создана):
-
-CREATE DATABASE IF NOT EXISTS survey;
-SHOW DATABASES; -- Убедиться, что база появилась в списке
-
-### 6. Применение миграций
-
-Выполните миграции, чтобы создать структуру таблиц:
-
-php artisan migrate:fresh --seed --seeder=SurveyDemoSeeder
-
-### 7. Тестовые данные
-
-После запуска сидеров доступны следующие данные для логина:
-
-Email: admin@starv.ru
-
-Password: password123
-
-### 8. Запуск приложения
-
-php artisan serve
-
-Приложение будет доступно по адресу: http://127.0.0.1:8000
+---

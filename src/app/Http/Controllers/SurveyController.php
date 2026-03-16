@@ -7,6 +7,24 @@ use Illuminate\Http\Request;
 
 class SurveyController extends Controller
 {
+    /**
+     * @OA\Post(
+     * path="/api/surveys",
+     * summary="Создать новый опрос (Только для админов)",
+     * tags={"Surveys"},
+     * security={{"bearerAuth":{}}},
+     * @OA\RequestBody(
+     * required=true,
+     * @OA\JsonContent(
+     * required={"title"},
+     * @OA\Property(property="title", type="string", example="Тюнинг выхлопной системы"),
+     * @OA\Property(property="description", type="string", example="Опрос о предпочтениях в звуке выхлопа")
+     * )
+     * ),
+     * @OA\Response(response=201, description="Опрос успешно создан"),
+     * @OA\Response(response=403, description="Недостаточно прав")
+     * )
+     */
     public function store(Request $request)
     {
         if (!auth('api')->user()->isAdmin()) {
@@ -30,6 +48,28 @@ class SurveyController extends Controller
         ], 201);
     }
 
+    /**
+     * @OA\Get(
+     * path="/api/surveys",
+     * summary="Получить список всех опросов",
+     * tags={"Surveys"},
+     * @OA\Parameter(
+     * name="status",
+     * in="query",
+     * description="Фильтр по статусу (draft, published, closed)",
+     * required=false,
+     * @OA\Schema(type="string")
+     * ),
+     * @OA\Parameter(
+     * name="my",
+     * in="query",
+     * description="Показать только мои опросы (1)",
+     * required=false,
+     * @OA\Schema(type="integer")
+     * ),
+     * @OA\Response(response=200, description="Успешный список опросов")
+     * )
+     */
     public function index(Request $request)
     {
         $query = Survey::query();
@@ -51,6 +91,15 @@ class SurveyController extends Controller
         return $query->paginate(10);
     }
 
+    /**
+     * @OA\Get(
+     * path="/api/surveys/{id}",
+     * summary="Детальная информация об опросе",
+     * tags={"Surveys"},
+     * @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     * @OA\Response(response=200, description="Данные опроса с вопросами")
+     * )
+     */
     public function show($id)
     {
         $survey = Survey::with('questions.options')->findOrFail($id);
@@ -58,6 +107,23 @@ class SurveyController extends Controller
         return response()->json($survey);
     }
 
+    /**
+     * @OA\Patch(
+     * path="/api/surveys/{id}/status",
+     * summary="Смена статуса опроса",
+     * tags={"Surveys"},
+     * security={{"bearerAuth":{}}},
+     * @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     * @OA\RequestBody(
+     * @OA\JsonContent(
+     * required={"status"},
+     * @OA\Property(property="status", type="string", enum={"published", "closed"})
+     * )
+     * ),
+     * @OA\Response(response=200, description="Статус изменен"),
+     * @OA\Response(response=422, description="Нарушение жизненного цикла")
+     * )
+     */
     public function changeStatus(Request $request, $id)
     {
         $survey = Survey::findOrFail($id);
@@ -97,6 +163,15 @@ class SurveyController extends Controller
         ]);
     }
 
+    /**
+     * @OA\Get(
+     * path="/api/surveys/{id}/passing",
+     * summary="Получить опрос для прохождения (только опубликованные)",
+     * tags={"Surveys"},
+     * @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     * @OA\Response(response=200, description="Данные для прохождения")
+     * )
+     */
     public function showForPassing($id)
     {
         $survey = Survey::with('questions.options')

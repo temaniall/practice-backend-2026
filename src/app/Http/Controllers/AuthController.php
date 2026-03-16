@@ -9,6 +9,25 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
+    /**
+     * @OA\Post(
+     * path="/api/register",
+     * summary="Регистрация нового пользователя",
+     * tags={"Auth"},
+     * @OA\RequestBody(
+     * required=true,
+     * @OA\JsonContent(
+     * required={"name","email","password","password_confirmation"},
+     * @OA\Property(property="name", type="string", example="Vadim"),
+     * @OA\Property(property="email", type="string", format="email", example="test@test.com"),
+     * @OA\Property(property="password", type="string", format="password", example="123456"),
+     * @OA\Property(property="password_confirmation", type="string", format="password", example="123456")
+     * )
+     * ),
+     * @OA\Response(response=201, description="Успешно"),
+     * @OA\Response(response=400, description="Ошибка валидации")
+     * )
+     */
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -36,6 +55,22 @@ class AuthController extends Controller
         ], 201);
     }
 
+    /**
+     * @OA\Post(
+     * path="/api/login",
+     * summary="Авторизация (получение токена)",
+     * tags={"Auth"},
+     * @OA\RequestBody(
+     * required=true,
+     * @OA\JsonContent(
+     * @OA\Property(property="email", type="string", example="test@test.com"),
+     * @OA\Property(property="password", type="string", example="123456")
+     * )
+     * ),
+     * @OA\Response(response=200, description="Токен получен"),
+     * @OA\Response(response=401, description="Неверные данные")
+     * )
+     */
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');

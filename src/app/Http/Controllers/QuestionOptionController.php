@@ -7,6 +7,31 @@ use Illuminate\Http\Request;
 
 class QuestionOptionController extends Controller
 {
+    /**
+     * @OA\Post(
+     * path="/api/questions/{questionId}/options",
+     * summary="Добавить вариант ответа к вопросу",
+     * tags={"Questions"},
+     * security={{"bearerAuth":{}}},
+     * @OA\Parameter(
+     * name="questionId",
+     * in="path",
+     * required=true,
+     * description="ID вопроса (не текстового)",
+     * @OA\Schema(type="integer")
+     * ),
+     * @OA\RequestBody(
+     * required=true,
+     * @OA\JsonContent(
+     * required={"option_text"},
+     * @OA\Property(property="option_text", type="string", example="Stage 1 (300 л.с.)")
+     * )
+     * ),
+     * @OA\Response(response=201, description="Вариант успешно добавлен"),
+     * @OA\Response(response=403, description="Доступ запрещен или опрос опубликован"),
+     * @OA\Response(response=422, description="Нельзя добавить вариант к текстовому вопросу")
+     * )
+     */
     public function store(Request $request, $questionId)
     {
         $question = Question::whereHas('survey', function($query) {

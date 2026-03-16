@@ -1,0 +1,597 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API",
+        "description": "API системы опросов для преддипломной практики",
+        "contact": {
+            "email": "vadim.starostin.07@gmail.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Локальный сервер"
+        }
+    ],
+    "paths": {
+        "/api/surveys/{id}/answers": {
+            "post": {
+                "tags": [
+                    "Answers"
+                ],
+                "summary": "Пройти опрос",
+                "operationId": "6a569a9a2ac7884ee4aeebd3a5d256b0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "answers": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "question_id": {
+                                                    "type": "integer"
+                                                },
+                                                "option_id": {
+                                                    "type": "integer",
+                                                    "nullable": true
+                                                },
+                                                "text_answer": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Сохранено"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/surveys/{id}/stats": {
+            "get": {
+                "tags": [
+                    "Answers"
+                ],
+                "summary": "Статистика опроса (публичная)",
+                "operationId": "5f53fc0c46baa25bfae67fd7c3caa07a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "JSON со статистикой"
+                    }
+                }
+            }
+        },
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Регистрация нового пользователя",
+                "operationId": "8a56853624e025573120a09a4c75d468",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Vadim"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "test@test.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "123456"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Успешно"
+                    },
+                    "400": {
+                        "description": "Ошибка валидации"
+                    }
+                }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Авторизация (получение токена)",
+                "operationId": "a3b306d14572d1f4bd6c064b3233e7b8",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "test@test.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Токен получен"
+                    },
+                    "401": {
+                        "description": "Неверные данные"
+                    }
+                }
+            }
+        },
+        "/api/surveys/{surveyId}/questions": {
+            "post": {
+                "tags": [
+                    "Questions"
+                ],
+                "summary": "Добавить новый вопрос в опрос",
+                "operationId": "6f9771f9c1db076c4fa171d414437ea3",
+                "parameters": [
+                    {
+                        "name": "surveyId",
+                        "in": "path",
+                        "description": "ID опроса",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "content",
+                                    "type"
+                                ],
+                                "properties": {
+                                    "content": {
+                                        "type": "string",
+                                        "example": "Какой тип тюнинга вас интересует?"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "text",
+                                            "radio",
+                                            "checkbox"
+                                        ]
+                                    },
+                                    "order": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Вопрос успешно добавлен"
+                    },
+                    "403": {
+                        "description": "Опрос уже опубликован или закрыт"
+                    },
+                    "404": {
+                        "description": "Опрос не найден"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/questions/{id}": {
+            "put": {
+                "tags": [
+                    "Questions"
+                ],
+                "summary": "Обновить текст вопроса",
+                "operationId": "795b02e5ecdc23fd74f20e0671a40f8c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID вопроса",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "content"
+                                ],
+                                "properties": {
+                                    "content": {
+                                        "type": "string",
+                                        "example": "Обновленный текст вопроса"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Вопрос успешно обновлен"
+                    },
+                    "403": {
+                        "description": "Доступ запрещен или опрос не в режиме черновика"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/questions/{questionId}/options": {
+            "post": {
+                "tags": [
+                    "Questions"
+                ],
+                "summary": "Добавить вариант ответа к вопросу",
+                "operationId": "c17faa57dc224f8f3fb43831cffecf76",
+                "parameters": [
+                    {
+                        "name": "questionId",
+                        "in": "path",
+                        "description": "ID вопроса (не текстового)",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "option_text"
+                                ],
+                                "properties": {
+                                    "option_text": {
+                                        "type": "string",
+                                        "example": "Stage 1 (300 л.с.)"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Вариант успешно добавлен"
+                    },
+                    "403": {
+                        "description": "Доступ запрещен или опрос опубликован"
+                    },
+                    "422": {
+                        "description": "Нельзя добавить вариант к текстовому вопросу"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/surveys": {
+            "get": {
+                "tags": [
+                    "Surveys"
+                ],
+                "summary": "Получить список всех опросов",
+                "operationId": "7e96246f34de1fcd663f2d95a5079073",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Фильтр по статусу (draft, published, closed)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "my",
+                        "in": "query",
+                        "description": "Показать только мои опросы (1)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный список опросов"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Surveys"
+                ],
+                "summary": "Создать новый опрос (Только для админов)",
+                "operationId": "a2cd6709081ad25c80c95f4cd8e97e2e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "title"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Тюнинг выхлопной системы"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Опрос о предпочтениях в звуке выхлопа"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Опрос успешно создан"
+                    },
+                    "403": {
+                        "description": "Недостаточно прав"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/surveys/{id}": {
+            "get": {
+                "tags": [
+                    "Surveys"
+                ],
+                "summary": "Детальная информация об опросе",
+                "operationId": "be961dc9b72fd27b646853e31bdac701",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Данные опроса с вопросами"
+                    }
+                }
+            }
+        },
+        "/api/surveys/{id}/status": {
+            "patch": {
+                "tags": [
+                    "Surveys"
+                ],
+                "summary": "Смена статуса опроса",
+                "operationId": "10f662df1396ade0cd460333fb18ca51",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "published",
+                                            "closed"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Статус изменен"
+                    },
+                    "422": {
+                        "description": "Нарушение жизненного цикла"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/surveys/{id}/passing": {
+            "get": {
+                "tags": [
+                    "Surveys"
+                ],
+                "summary": "Получить опрос для прохождения (только опубликованные)",
+                "operationId": "38daa5eef6320aa7149d6d4ce5f97227",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Данные для прохождения"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Survey": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Тюнинг BMW M5"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "published",
+                            "closed"
+                        ]
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Answers",
+            "description": "Answers"
+        },
+        {
+            "name": "Auth",
+            "description": "Auth"
+        },
+        {
+            "name": "Questions",
+            "description": "Questions"
+        },
+        {
+            "name": "Surveys",
+            "description": "Surveys"
+        }
+    ]
+}

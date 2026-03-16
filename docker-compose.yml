@@ -1,0 +1,48 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: survey_app
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/var/www/src
+    depends_on:
+      - db
+    networks:
+      - survey_net
+
+  db:
+    image: mysql:8.0
+    container_name: survey_db
+    environment:
+      MYSQL_DATABASE: survey_db
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - survey_net
+
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: survey_pma
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=db
+      - PMA_USER=root
+      - PMA_PASSWORD=root
+    networks:
+      - survey_net
+
+networks:
+  survey_net:
+    driver: bridge
+
+volumes:
+  db_data:
